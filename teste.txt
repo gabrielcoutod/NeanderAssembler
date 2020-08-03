@@ -1,0 +1,51 @@
+; calcula log de n na base b arredondado para cima
+; entrada n: posição 128, será inteiro positivo maior ou igual a 1
+; entrada b: posição 129, será inteiro positivo maior ou igual a 2
+; saida x: posição 130
+org 128
+log: db 0 ; logaritmando
+base: db 0 ; base
+resultado: db 0 ; resultado
+ZERO: db 0 ; constante zero
+UM: db 1 ; constante um
+MUM: db -1 ; constante - 1
+b_na_x: db 0 ; b^x
+contador: db 0 ; contador para as somas sucessivas da multiplicação
+backup_b_na_x: db 0 ; backup de b^x
+
+org 0
+; carrega 1 e coloca em b^x(b^0 = 1)
+    lda um
+    sta b_na_x
+; coloca -1 no resultado pois nas proximas instruções somara 1 e dara 0 (primeiro resultado possivel)
+    lda mum
+    sta resultado
+loop_mult:
+; testa se b^x>= n(resultado esta correto) testando se n-b^x é igual a zero ou maior
+    lda resultado
+    add um
+    sta resultado
+    lda b_na_x
+    not
+    add um
+    add log
+    jn fim
+    jz fim
+; prepara as variaveis para as somas sucessivas
+    lda base
+    sta contador
+    lda b_na_x
+    sta backup_b_na_x
+loop_soma:
+; subtrai 1 do contador e caso seja zero terminou o loop das somas sucessivas
+    lda contador
+    add mum
+    sta contador
+    jz loop_mult
+; se o contador não é zero carrega b^x e soma com o backup de b^x do inicio das somas sucessivas
+    lda b_na_x
+    add backup_b_na_x
+    sta b_na_x
+    jmp loop_soma
+fim:
+    hlt 
